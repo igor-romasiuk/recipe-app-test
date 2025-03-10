@@ -2,6 +2,12 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { recipeApi } from '../services/api';
 import { useFavorites } from '../hooks/useFavorites';
+import { Loading } from '../components/Loading';
+import { BackButton } from '../components/BackButton';
+import { RecipeHeader } from '../components/RecipeHeader';
+import { IngredientsList } from '../components/IngredientsList';
+import { Instructions } from '../components/Instructions';
+import { VideoTutorial } from '../components/VideoTutorial';
 
 export default function RecipeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -14,95 +20,54 @@ export default function RecipeDetail() {
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return <Loading message="Loading recipe..." />;
   }
 
   if (!recipe) {
-    return <div className="text-center text-red-500">Recipe not found</div>;
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Recipe not found</h2>
+        <BackButton />
+      </div>
+    );
   }
-
-  const ingredients = Array.from({ length: 20 }, (_, i) => {
-    const ingredient = recipe[`strIngredient${i + 1}` as keyof typeof recipe];
-    const measure = recipe[`strMeasure${i + 1}` as keyof typeof recipe];
-    return ingredient && ingredient.trim() ? { ingredient, measure } : null;
-  }).filter(Boolean);
 
   return (
     <div className="max-w-4xl mx-auto">
+      <BackButton />
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="relative">
-          <img
-            src={recipe.strMealThumb}
-            alt={recipe.strMeal}
-            className="w-full h-96 object-cover"
-          />
-          <button
-            onClick={() => isFavorite(recipe.idMeal) ? removeFavorite(recipe.idMeal) : addFavorite(recipe)}
-            className={`absolute top-4 right-4 p-3 rounded-full bg-white shadow-md ${
-              isFavorite(recipe.idMeal)
-                ? 'text-red-500 hover:text-red-600'
-                : 'text-gray-400 hover:text-gray-500'
-            }`}
-          >
-            ❤
-          </button>
-        </div>
+        <RecipeHeader
+          recipe={recipe}
+          isFavorite={isFavorite(recipe.idMeal)}
+          onToggleFavorite={() =>
+            isFavorite(recipe.idMeal)
+              ? removeFavorite(recipe.idMeal)
+              : addFavorite(recipe)
+          }
+        />
 
-        <div className="p-6 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{recipe.strMeal}</h1>
-            <div className="flex gap-4 text-gray-600">
-              <span>{recipe.strCategory}</span>
-              <span>•</span>
-              <span>{recipe.strArea}</span>
-            </div>
+        <div className="p-6 space-y-8">
+          <div className="grid md:grid-cols-2 gap-8">
+            <IngredientsList recipe={recipe} />
+            <Instructions instructions={recipe.strInstructions} />
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold mb-3">Ingredients</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {ingredients.map((item, index) => (
-                <div key={index} className="flex justify-between">
-                  <span>{item?.ingredient}</span>
-                  <span className="text-gray-600">{item?.measure}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold mb-3">Instructions</h2>
-            <div className="space-y-4">
-              {recipe.strInstructions.split('\r\n').filter(Boolean).map((step, index) => (
-                <p key={index}>{step}</p>
-              ))}
-            </div>
-          </div>
-
-          {recipe.strYoutube && (
-            <div>
-              <h2 className="text-xl font-semibold mb-3">Video Tutorial</h2>
-              <a
-                href={recipe.strYoutube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-teal-600 hover:text-teal-700"
-              >
-                Watch on YouTube
-              </a>
-            </div>
-          )}
+          <VideoTutorial videoUrl={recipe.strYoutube} />
 
           {recipe.strSource && (
-            <div>
-              <h2 className="text-xl font-semibold mb-3">Source</h2>
+            <div className="flex justify-end">
               <a
                 href={recipe.strSource}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-teal-600 hover:text-teal-700"
+                className="inline-flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
-                Original Recipe
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                  <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                </svg>
+                View Original Recipe
               </a>
             </div>
           )}
