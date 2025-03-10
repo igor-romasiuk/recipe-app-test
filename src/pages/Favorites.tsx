@@ -2,6 +2,7 @@ import { useFavorites } from '../hooks/useFavorites';
 import { EmptyFavorites } from '../components/EmptyFavorites';
 import { FavoriteRecipeCard } from '../components/FavoriteRecipeCard';
 import { CombinedIngredients } from '../components/CombinedIngredients';
+import { Instructions } from '../components/Instructions';
 
 export default function Favorites() {
   const { favorites, removeFavorite, getCombinedIngredients } = useFavorites();
@@ -32,6 +33,18 @@ export default function Favorites() {
       </div>
 
       <CombinedIngredients ingredients={combinedIngredients} />
+
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-semibold mb-6 text-orange-900">Cooking Instructions</h2>
+        <div className="space-y-8">
+          {favorites.map((recipe) => (
+            <div key={recipe.idMeal} className="border-b border-gray-200 pb-6 last:border-b-0">
+              <h3 className="text-xl font-medium text-orange-800 mb-4">{recipe.strMeal}</h3>
+              <Instructions instructions={recipe.strInstructions} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 } 

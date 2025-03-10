@@ -11,8 +11,7 @@ import { RecipeCard } from '../components/RecipeCard';
 import { Pagination } from '../components/Pagination';
 import { Loading } from '../components/Loading';
 import { EmptyRecipes } from '../components/EmptyRecipes';
-
-const ITEMS_PER_PAGE = 12;
+import { RecipesPerPage } from '../components/RecipesPerPage';
 
 export default function RecipeList() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +19,7 @@ export default function RecipeList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const navigate = useNavigate();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
@@ -36,7 +36,7 @@ export default function RecipeList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, itemsPerPage]);
 
   const debouncedSearch = debounce((value: string) => {
     setSearchQuery(value);
@@ -60,13 +60,17 @@ export default function RecipeList() {
     setSelectedCategory(value);
   };
 
+  const handlePageSizeChange = (size: number) => {
+    setItemsPerPage(size);
+  };
+
   const filteredRecipes = selectedCategory
     ? recipes.filter(recipe => recipe.strCategory === selectedCategory)
     : recipes;
 
-  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -86,15 +90,13 @@ export default function RecipeList() {
             onCategoryChange={handleCategoryChange}
           />
         </div>
-        <div className="mt-4 text-sm text-gray-600">
-          {searchQuery && (
-            <p>
-              Found {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} 
-              {selectedCategory ? ` in ${selectedCategory}` : ''} 
-              {searchQuery ? ` for "${searchQuery}"` : ''}
-            </p>
-          )}
-        </div>
+        <RecipesPerPage
+          searchQuery={searchQuery}
+          selectedCategory={selectedCategory}
+          totalResults={filteredRecipes.length}
+          pageSize={itemsPerPage}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
 
       {isLoading ? (
