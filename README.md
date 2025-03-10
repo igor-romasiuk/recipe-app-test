@@ -2,6 +2,10 @@
 
 A modern, responsive web application for discovering and managing recipes. Built with React, TypeScript, and TheMealDB API.
 
+## 🌐 Live Demo
+
+Check out the live application: [Recipe App](https://recipe-app-test-phi.vercel.app/)
+
 ## 🌟 Features
 
 - **Recipe Discovery**
@@ -50,7 +54,7 @@ A modern, responsive web application for discovering and managing recipes. Built
 
 1. Clone the repository:
    ```bash
-   git clone <https://github.com/igor-romasiuk/recipe-app-test>
+   git clone https://github.com/igor-romasiuk/recipe-app-test
    cd recipe-app
    ```
 
